@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import requests
 
@@ -7,9 +8,8 @@ st.set_page_config(page_title="Reclutador IA", page_icon="🤖", layout="wide")
 # ==========================================
 # CONFIGURACIÓN
 # ==========================================
-# Cuando despliegues en Render, cambiarás esta URL por la de tu backend web
-# Ejemplo: API_URL = "https://mi-backend-agentes.onrender.com"
-API_URL = "http://localhost:8000"
+# La URL del backend se lee desde variable de entorno; por defecto apunta a localhost
+API_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 # Inicializar el estado de la sesión para no perder datos al recargar la pantalla
 if "preguntas" not in st.session_state:
@@ -22,7 +22,7 @@ if "cargando" not in st.session_state:
 # ==========================================
 # INTERFAZ GRÁFICA
 # ==========================================
-st.title("🤖 Agente de Reclutamiento con IA")
+st.title(" Agente de Reclutamiento con IA")
 st.markdown("Sube una oferta de trabajo y un CV para que nuestro sistema multi-agente genere una entrevista técnica personalizada.")
 
 # --- FASE 1: Subida de Datos (RRHH) ---
@@ -41,7 +41,7 @@ if st.session_state.preguntas is None and st.session_state.veredicto is None:
     with col2:
         cv_pdf = st.file_uploader("Sube el CV del Candidato (PDF)", type=["pdf"])
 
-    if st.button("Analizar CV y Generar Entrevista 🚀"):
+    if st.button("Analizar CV y Generar Entrevista "):
         if not descripcion_puesto or not cv_pdf:
             st.warning("Por favor, completa la descripción y sube un PDF.")
         else:
@@ -100,7 +100,7 @@ elif st.session_state.preguntas is not None and st.session_state.veredicto is No
 
 # --- FASE 3: Veredicto Final (RRHH) ---
 elif st.session_state.veredicto is not None:
-    st.header("3. Veredicto del Reclutador Senior ⚖️")
+    st.header("3. Veredicto del Reclutador Senior ")
     
     v = st.session_state.veredicto
     resultado_final = v.get("veredicto", "NO DEFINIDO")

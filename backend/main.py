@@ -51,40 +51,41 @@ class RespuestasCandidato(BaseModel):
 # ==========================================
 
 @app.post("/generar-preguntas/")
-async def endpoint_generar_preguntas(
+def endpoint_generar_preguntas(
     descripcion_puesto: str = Form(...),
     cv: UploadFile = File(...)
 ):
-    """
-    Fase 1: Recibe la oferta de trabajo y el CV. Genera las 4 preguntas.
-    """
     if not cv.filename.endswith('.pdf'):
         raise HTTPException(status_code=400, detail="El archivo debe ser un PDF.")
 
-    # 1. Guardamos el PDF temporalmente en el servidor
     ruta_temporal = f"temp_{cv.filename}"
     with open(ruta_temporal, "wb") as buffer:
         shutil.copyfileobj(cv.file, buffer)
 
     try:
-        # 2. Despertamos a los agentes 1, 2 y 3
+        # ---- AÑADE ESTE PRINT ----
+        print(" Archivo recibido. Despertando a los agentes...")
+        
         resultado_raw = procesar_cv_y_generar_preguntas(descripcion_puesto, ruta_temporal)
         
-        # 3. Limpiamos la respuesta para devolver un JSON perfecto
+        # ---- AÑADE ESTE PRINT ----
+        print(" Los agentes terminaron con éxito.")
+        
         json_limpio = extraer_json_de_texto(resultado_raw)
         return json_limpio
 
     except Exception as e:
+        # ---- AÑADE ESTE PRINT PARA VER ERRORES REALES ----
+        print(f" ERROR EN EL BACKEND: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     
     finally:
-        # 4. Limpiamos: Borramos el PDF temporal para no saturar el servidor
         if os.path.exists(ruta_temporal):
             os.remove(ruta_temporal)
 
 
 @app.post("/evaluar-candidato/")
-async def endpoint_evaluar_candidato(datos: RespuestasCandidato):
+def endpoint_evaluar_candidato(datos: RespuestasCandidato):
     """
     Fase 2: Recibe las respuestas del candidato y emite el veredicto final.
     """

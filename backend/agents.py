@@ -3,25 +3,32 @@ from dotenv import load_dotenv
 from crewai import Agent, Task, Crew, LLM
 from tools import leer_pdf_tool
 
+# EVITAR CONGELAMIENTOS DE TELEMETRÍA
+os.environ["OTEL_SDK_DISABLED"] = "true"
+os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
 clave_api = os.getenv("GOOGLE_API_KEY")
 
 # Inicializamos el motor de IA
 mi_llm = LLM(
-    model="gemini/gemini-2.5-flash",
+    model="gemini/gemini-3.1-flash-lite",
     api_key=clave_api,
     temperature=0.2
 )
 
 # ==========================================
-# DEFINICIÓN DE AGENTES (Reutilizables)
+# DEFINICIÓN DE AGENTES (Reutilizables con Skills)
 # ==========================================
 
 analista_perfil = Agent(
     role='Analista Senior de Reclutamiento Técnico',
     goal='Analizar descripciones de puestos de trabajo y extraer requisitos obligatorios en formato JSON.',
-    backstory='Eres un experto en recursos humanos de una empresa tecnológica.',
+    backstory='''Eres un experto en recursos humanos de una empresa tecnológica de élite. 
+    Tus habilidades (skills) incluyen:
+    - Análisis semántico de requerimientos técnicos.
+    - Mapeo de competencias tecnológicas (identificar si un framework pertenece a Frontend, Backend, Infraestructura, o Machine Learning).
+    - Diferenciación estricta entre herramientas obligatorias y "nice-to-have".''',
     verbose=True,
     allow_delegation=False,
     llm=mi_llm
@@ -30,7 +37,12 @@ analista_perfil = Agent(
 evaluador_cv = Agent(
     role='Evaluador Técnico de Talento',
     goal='Analizar el texto extraído de un CV y compararlo rigurosamente contra el perfil de puesto ideal.',
-    backstory='Eres un evaluador técnico implacable pero justo.',
+    backstory='''Eres un evaluador técnico implacable pero justo. 
+    Tus habilidades (skills) incluyen:
+    - Evaluación estructurada de perfiles técnicos.
+    - Detección de "falsos positivos" (candidatos que mencionan una tecnología de pasada vs. experiencia real).
+    - Comprensión profunda de ecosistemas: entiendes cómo se relacionan herramientas como Python, Docker, redes TCP/UDP y bases de datos en un entorno real.
+    - Pensamiento crítico para identificar brechas de conocimiento.''',
     verbose=True,
     allow_delegation=False,
     tools=[leer_pdf_tool],
@@ -40,7 +52,12 @@ evaluador_cv = Agent(
 entrevistador = Agent(
     role='Entrevistador Técnico Especializado',
     goal='Diseñar preguntas de entrevista personalizadas basadas en el reporte de compatibilidad del candidato.',
-    backstory='Eres un líder técnico de ingeniería. Tus preguntas buscan descubrir si el candidato puede usar lo que sabe para aprender lo que le falta.',
+    backstory='''Eres un líder técnico de ingeniería. 
+    Tus habilidades (skills) incluyen:
+    - Dominio de la metodología STAR (Situación, Tarea, Acción, Resultado) para formular preguntas conductuales.
+    - Creación de escenarios hipotéticos para evaluar resolución de problemas.
+    - Evaluación de adaptabilidad: sabes formular preguntas para descubrir si el candidato puede usar lo que ya sabe para aprender herramientas nuevas rápidamente.
+    No haces preguntas genéricas ni de libro de texto; diseñas retos intelectuales.''',
     verbose=True,
     allow_delegation=False,
     llm=mi_llm
@@ -49,7 +66,12 @@ entrevistador = Agent(
 clasificador = Agent(
     role='Reclutador Senior y Tomador de Decisiones',
     goal='Analizar las respuestas de la entrevista técnica y emitir un veredicto final: APTO, NO APTO o EN OBSERVACIÓN.',
-    backstory='Eres el director de ingeniería. Tienes la última palabra en las contrataciones.',
+    backstory='''Eres el director de ingeniería. Tienes la última palabra en las contrataciones. 
+    Tus habilidades (skills) incluyen:
+    - Toma de decisiones basada en datos empíricos.
+    - Análisis de potencial vs. experiencia actual.
+    - Redacción de feedback constructivo, profesional y empático.
+    Valoras la honestidad y la capacidad de aprendizaje sistemático, pero priorizas las necesidades técnicas y urgencias del proyecto al emitir tu veredicto.''',
     verbose=True,
     allow_delegation=False,
     llm=mi_llm
