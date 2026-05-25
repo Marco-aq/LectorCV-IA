@@ -6,7 +6,7 @@ services:
     plan: free
     region: oregon
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
+    buildCommand: CARGO_HOME=/opt/render/project/.cargo PIP_CACHE_DIR=/opt/render/project/.cache/pip pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
     envVars:
       - key: GOOGLE_API_KEY
